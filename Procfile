@@ -1,1 +1,1 @@
-web: gunicorn video_subtitler.wsgi 
+web:python manage.py collectstatic && gunicorn video_subtitler.wsgi 
