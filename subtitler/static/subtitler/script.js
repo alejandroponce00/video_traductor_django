@@ -47,6 +47,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     subtitlesDiv.textContent = '';
                 }
             });
+
+            // Añadir pistas de texto al video
+            const track = videoPlayer.addTextTrack("captions", "Español", "es");
+            track.mode = "showing";
+            data.subtitles.forEach(subtitle => {
+                const cue = new VTTCue(subtitle.start, subtitle.end, subtitle.text);
+                track.addCue(cue);
+            });
         })
         .catch(error => {
             console.error('Error:', error);

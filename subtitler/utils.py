@@ -6,6 +6,8 @@ from googletrans import Translator
 from django.conf import settings
 import subprocess
 import json
+from pydub import AudioSegment
+from pydub.silence import split_on_silence
 
 def extract_audio(video_path, audio_path):
     command = [
@@ -20,20 +22,36 @@ def extract_audio(video_path, audio_path):
 
 def transcribe_audio_realtime(audio_path):
     recognizer = sr.Recognizer()
-    with sr.AudioFile(audio_path) as source:
-        audio = recognizer.record(source)
-    try:
-        result = recognizer.recognize_google(audio, show_all=True)
-        if not result:
-            print("Could not understand audio")
-            return None
-        return result
-    except sr.UnknownValueError:
-        print("Google Speech Recognition could not understand audio")
-        return None
-    except sr.RequestError as e:
-        print(f"Could not request results from Google Speech Recognition service; {e}")
-        return None
+    audio = AudioSegment.from_wav(audio_path)
+    chunks = split_on_silence(audio, min_silence_len=500, silence_thresh=audio.dBFS-14)
+    
+    transcript = []
+    current_time = 0
+    
+    for i, chunk in enumerate(chunks):
+        chunk_path = os.path.join(settings.MEDIA_ROOT, f"chunk_{i}.wav")
+        chunk.export(chunk_path, format="wav")
+        
+        with sr.AudioFile(chunk_path) as source:
+            audio_chunk = recognizer.record(source)
+            try:
+                result = recognizer.recognize_google(audio_chunk, show_all=False)
+                if result:
+                    end_time = current_time + len(chunk) / 1000.0
+                    transcript.append({
+                        'text': result,
+                        'start': current_time,
+                        'end': end_time
+                    })
+                    current_time = end_time
+            except sr.UnknownValueError:
+                print(f"Could not understand audio in chunk {i}")
+            except sr.RequestError as e:
+                print(f"Could not request results from Google Speech Recognition service; {e}")
+            
+        os.remove(chunk_path)
+    
+    return transcript
 
 def translate_text(text, dest_language='es'):
     translator = Translator()
@@ -47,19 +65,13 @@ def process_video_realtime(video_path):
     transcript = transcribe_audio_realtime(audio_path)
     
     subtitles = []
-    if transcript and isinstance(transcript, dict) and 'alternative' in transcript:
-        for i, result in enumerate(transcript['alternative']):
-            text = result['transcript']
-            translated_text = translate_text(text)
-            start_time = i * 5  # Assuming each subtitle lasts 5 seconds
-            end_time = (i + 1) * 5
-            subtitles.append({
-                'start': start_time,
-                'end': end_time,
-                'text': translated_text
-            })
-    else:
-        print("No se pudo transcribir el audio correctamente")
+    for item in transcript:
+        translated_text = translate_text(item['text'])
+        subtitles.append({
+            'start': item['start'],
+            'end': item['end'],
+            'text': translated_text
+        })
 
     # Clean up temporary files
     os.remove(audio_path)
