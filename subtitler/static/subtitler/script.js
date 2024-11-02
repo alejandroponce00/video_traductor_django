@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     const progressBar = document.querySelector('.progress-bar');
     const videoContainer = document.getElementById('videoContainer');
     const videoPlayer = document.getElementById('videoPlayer');
-    const subtitlesDiv = document.getElementById('subtitles');
 
     form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -33,20 +32,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
             // Mostrar el video
             videoContainer.style.display = 'block';
             videoPlayer.src = URL.createObjectURL(formData.get('file'));
-
-            // Manejar subtítulos
-            videoPlayer.addEventListener('timeupdate', () => {
-                const currentTime = videoPlayer.currentTime;
-                const currentSubtitle = data.subtitles.find(
-                    subtitle => currentTime >= subtitle.start && currentTime <= subtitle.end
-                );
-                
-                if (currentSubtitle) {
-                    subtitlesDiv.textContent = currentSubtitle.text;
-                } else {
-                    subtitlesDiv.textContent = '';
-                }
-            });
 
             // Añadir pistas de texto al video
             const track = videoPlayer.addTextTrack("captions", "Español", "es");
