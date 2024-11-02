@@ -1,17 +1,20 @@
 document.addEventListener('DOMContentLoaded', (event) => {
-    const form = document.querySelector('form');
+    const form = document.getElementById('videoForm');
     const progressDiv = document.getElementById('progress');
     const progressBar = document.querySelector('.progress-bar');
+    const videoContainer = document.getElementById('videoContainer');
+    const videoPlayer = document.getElementById('videoPlayer');
+    const subtitlesDiv = document.getElementById('subtitles');
 
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         
         const formData = new FormData(form);
         
-        progressDiv.style.display  = 'block';
+        progressDiv.style.display = 'block';
         progressBar.style.width = '0%';
 
-        fetch(form.action, {
+        fetch('/process/', {
             method: 'POST',
             body: formData,
             headers: {
@@ -20,21 +23,30 @@ document.addEventListener('DOMContentLoaded', (event) => {
         })
         .then(response => {
             if (response.ok) {
-                return response.blob();
+                return response.json();
             }
             throw new Error('Network response was not ok.');
         })
-        .then(blob => {
+        .then(data => {
             progressBar.style.width = '100%';
             
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = 'video_subtitulado.mp4';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
+            // Mostrar el video
+            videoContainer.style.display = 'block';
+            videoPlayer.src = URL.createObjectURL(formData.get('file'));
+
+            // Manejar subtítulos
+            videoPlayer.addEventListener('timeupdate', () => {
+                const currentTime = videoPlayer.currentTime;
+                const currentSubtitle = data.subtitles.find(
+                    subtitle => currentTime >= subtitle.start && currentTime <= subtitle.end
+                );
+                
+                if (currentSubtitle) {
+                    subtitlesDiv.textContent = currentSubtitle.text;
+                } else {
+                    subtitlesDiv.textContent = '';
+                }
+            });
         })
         .catch(error => {
             console.error('Error:', error);

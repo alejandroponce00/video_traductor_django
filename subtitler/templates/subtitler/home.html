@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subtitulador de Videos</title>
+    <title>Subtitulador de Videos en Tiempo Real</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'subtitler/style.css' %}">
 </head>
 <body>
     <div class="container">
-        <h1>Subtitulador de Videos</h1>
-        <form action="{% url 'process_video' %}" method="post" enctype="multipart/form-data">
+        <h1>Subtitulador de Videos en Tiempo Real</h1>
+        <form id="videoForm" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="file-input">
                 {{ form.file }}
@@ -18,6 +18,12 @@
             </div>
             <button type="submit">Procesar Video</button>
         </form>
+        <div id="videoContainer" style="display: none;">
+            <video id="videoPlayer" controls>
+                Tu navegador no soporta el elemento de video.
+            </video>
+            <div id="subtitles"></div>
+        </div>
         <div id="progress" class="progress" style="display: none;">
             <div class="progress-bar"></div>
         </div>
