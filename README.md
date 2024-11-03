@@ -62,6 +62,7 @@ Este proyecto es una aplicación web construida en Django que permite generar su
 ## 📄 Licencia
 
 Este proyecto está licenciado bajo la [MIT License](LICENSE).
+desplegado en Railway
 
 ---
 

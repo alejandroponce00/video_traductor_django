@@ -94,4 +94,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATICFILES_DIRS = (os.path.join(BASE_DIR,'subtitler/static'),)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-ALLOWED_HOSTS=['videotraductordjango-production.up.railway.app']
+ALLOWED_HOSTS=['videotraductordjango-production.up.railway.app','127.0.0.1']
