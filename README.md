@@ -40,7 +40,7 @@ Este proyecto es una aplicación web construida en Django que permite generar su
     python manage.py runserver
     ```
 
-4. Accede a la aplicación en tu navegador en [http://127.0.0.1:8000](http://127.0.0.1:8000) y sube tu video. 📁
+4. Accede a la aplicación en tu navegador en [https://videotraductordjango-production.up.railway.app](https://videotraductordjango-production.up.railway.app) y sube tu video. 📁
 
 ## 📂 Estructura del proyecto
 
